@@ -1,0 +1,13 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Users - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><h2>Users</h2><div id="u">Load ho raha hai...</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("admin","admin-users.html");if(!S)return;
+
+const {data,error}=await db.from("profiles").select("*").order("email");
+const L=$("u");L.textContent="";if(error||!data.length){L.textContent=error?error.message:"Abhi koi user nahi.";return}
+data.forEach(p=>{const c=E("div","row"),bl=E("div","mute","Balance: "+inr(p.balance));c.append(E("b","",p.email),bl);
+ const a=E("input");a.type="number";a.placeholder="Rs jodne ke liye amount";const b=E("button","btn","Balance jodein");
+ b.onclick=async()=>{const x=Number(a.value);if(!x)return;const {error}=await db.from("profiles").update({balance:Number(p.balance)+x}).eq("user_id",p.user_id);done(b,error,"Balance jud gaya");if(!error){p.balance=Number(p.balance)+x;bl.textContent="Balance: "+inr(p.balance);a.value=""}};
+ c.append(a,b);L.append(c)});
+})();</script></body></html>

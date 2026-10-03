@@ -1,0 +1,29 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>New order - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><div class="box"><div class="chips" id="chips"></div><input id="q" placeholder="Search">
+<label>Category</label><select id="cat"></select><label>Service</label><select id="sv"></select><p class="mute" id="desc"></p>
+<label>Link</label><input id="lnk" placeholder="https://..."><label>Quantity</label><input id="qty" type="number" min="1" value="100"><p class="mute" id="lim"></p>
+<label>Charge</label><h2 id="chg">₹0</h2><button class="btn" id="go">Order karein</button><div class="msg" id="om"></div></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("user","neworder.html");if(!S)return;
+
+const r=await db.from("services").select("*").order("id"),svcs=r.data||[];let cat="All";
+const cats=()=>[...new Set(svcs.map(s=>s.category||"Other"))];
+const cur=()=>svcs.find(x=>x.id==$("sv").value);
+function setCat(c){cat=c;const ch=$("chips"),cs=$("cat");ch.textContent="";cs.textContent="";
+ ["All",...cats()].forEach(x=>{const b=E("button","chip"+(x==c?" on":""),x);b.onclick=()=>setCat(x);ch.append(b);const o=E("option","",x);o.value=x;o.selected=x==c;cs.append(o)});fillSv()}
+function fillSv(){const q=$("q").value.toLowerCase(),sv=$("sv");sv.textContent="";
+ svcs.filter(s=>(cat=="All"||(s.category||"Other")==cat)&&s.name.toLowerCase().includes(q)).forEach(s=>{const o=E("option","",s.id+" - "+s.name+" - "+inr(s.rate)+" per 1000");o.value=s.id;sv.append(o)});pick()}
+function pick(){const s=cur();$("desc").textContent=s?(s.description||""):"Koi service nahi mili";$("lim").textContent=s?"Min: "+s.min_qty+" Max: "+s.max_qty:"";chg()}
+function chg(){const s=cur();$("chg").textContent=inr(s?s.rate*(parseInt($("qty").value)||0)/1000:0)}
+$("q").oninput=fillSv;$("cat").onchange=e=>setCat(e.target.value);$("sv").onchange=pick;$("qty").oninput=chg;
+$("go").onclick=async()=>{const s=cur(),q=parseInt($("qty").value),l=$("lnk").value.trim(),m=$("om");
+ if(!s){m.textContent="Service chuno";return}
+ if(!/^https?:\/\//.test(l)){m.textContent="Sahi link daalein (https:// se shuru)";return}
+ if(!(q>0)){m.textContent="Quantity daalein";return}
+ const {data,error}=await db.from("orders").insert({service_id:s.id,quantity:q,link:l}).select().single();
+ if(error){m.textContent=error.message;return}
+ m.textContent="Order bhej raha hoon...";await fn({action:"send",order_id:data.id});
+ alert("Order ho gaya! Order ID: "+oid(data.id));location.href="orders.html"};
+setCat("All");
+})();</script></body></html>

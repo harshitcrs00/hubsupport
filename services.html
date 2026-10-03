@@ -1,0 +1,7 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Services - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><h2>Services</h2><div id="sl">Load ho raha hai...</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("user","services.html");if(!S)return;
+const r=await db.from("services").select("*").order("id");listS($("sl"),r.data||[]);
+})();</script></body></html>

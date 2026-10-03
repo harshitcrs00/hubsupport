@@ -1,0 +1,9 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Add funds - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><div class="box"><h2>Funds add karein</h2><p>Aapka balance: <b id="b2"></b></p>
+<p class="mute">Payment karke screenshot WhatsApp par bhejein. Admin check karke balance jod dega.</p>
+<a class="btn" href="https://wa.me/919557890307" style="text-decoration:none;display:inline-block">WhatsApp par bhejein</a></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("user","funds.html");if(!S)return;
+$("b2").textContent=inr(S.prof.balance);
+})();</script></body></html>

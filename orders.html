@@ -1,0 +1,13 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Orders history - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><h2>Orders history</h2><div id="ol">Load ho raha hai...</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("user","orders.html");if(!S)return;
+
+await fn({action:"sync"});
+const {data,error}=await db.from("orders").select("*").order("id",{ascending:false});
+const L=$("ol");L.textContent="";if(error||!data.length){L.textContent=error?"Orders load nahi hue.":"Abhi tak koi order nahi.";return}
+data.forEach(o=>{const r=E("div","row");
+ r.append(E("b","",oid(o.id)+" - "+o.service_name),E("div","mute","Qty "+o.quantity+" | "+inr(o.total)+(o.remains!=null?" | Baaki: "+o.remains:"")+" | "+new Date(o.created_at).toLocaleString("en-IN")),E("div","mute","Link: "+o.link));
+ if(o.note)r.append(E("div","","Update: "+o.note));r.append(E("span","badge s-"+o.status,o.status));L.append(r)});
+})();</script></body></html>

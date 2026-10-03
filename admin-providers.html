@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Providers - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><div class="box"><h3>Provider jodein</h3><input id="pn" placeholder="Provider ka naam"><input id="pu" placeholder="API URL (jaise https://provider.com/api/v2)"><input id="pk" placeholder="API Key">
+<button class="btn" id="go">Provider save karein</button><div class="msg" id="pm"></div></div><div id="pl"></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("admin","admin-providers.html");if(!S)return;
+
+async function load(){const {data,error}=await db.from("providers").select("id,name,url").order("id");
+ const L=$("pl");L.textContent="";if(error){L.textContent=error.message;return}
+ data.forEach(p=>{const c=E("div","row");c.append(E("b","",p.name),E("div","mute",p.url));
+  const f=E("input");f.placeholder="Category filter (jaise Instagram). Khali = sab services";
+  const x=E("input");x.type="number";x.placeholder="Munafa % (jaise 30)";x.value=30;
+  const m=E("input");m.type="number";m.placeholder="Currency (provider USD mein ho to 85, INR ho to 1)";m.value=1;
+  const b=E("button","btn","Services import karein");
+  b.onclick=async()=>{b.textContent="Import ho rahi hain...";const r=await fn({action:"import",provider_id:p.id,markup:Number(x.value)||0,mult:Number(m.value)||1,filter:f.value});b.textContent=r.error?"Error: "+r.error:r.imported+" services import hui"};
+  c.append(f,x,m,b);L.append(c)})}
+$("go").onclick=async()=>{const name=$("pn").value.trim(),url=$("pu").value.trim(),api_key=$("pk").value.trim();
+ if(!name||!/^https?:\/\//.test(url)||!api_key){$("pm").textContent="Naam, sahi API URL aur key teeno daalein";return}
+ const {error}=await db.from("providers").insert({name,url,api_key});
+ if(error){$("pm").textContent=error.message;return}
+ ["pn","pu","pk"].forEach(i=>$(i).value="");$("pm").textContent="Provider save ho gaya";load()};
+load();
+})();</script></body></html>

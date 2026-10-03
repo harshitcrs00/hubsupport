@@ -1,0 +1,23 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Orders - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><div id="o">Load ho raha hai...</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("admin","admin-orders.html");if(!S)return;
+
+const {data,error}=await db.from("orders").select("*").order("id",{ascending:false});
+const L=$("o");L.textContent="";if(error){L.textContent=error.message;return}
+const rev=data.filter(o=>o.status!="Cancelled").reduce((t,o)=>t+Number(o.total||0),0);
+const top=E("div","box");top.append(E("b","","Total orders: "+data.length+" | Kamai (cancel chhod kar): "+inr(rev)+" "));
+const sb=E("button","btn","Status sync karein");sb.onclick=async()=>{sb.textContent="Sync ho raha hai...";const r=await fn({action:"sync"});sb.textContent=r.error?"Error: "+r.error:r.updated+" orders update hue";setTimeout(()=>location.reload(),1500)};top.append(sb);L.append(top);
+if(!data.length){L.append("Abhi koi order nahi.");return}
+data.forEach(o=>{const c=E("div","row");
+ c.append(E("b","",oid(o.id)+" - "+o.service_name),E("div","mute",o.user_email+" | Qty "+o.quantity+" | "+inr(o.total)+" | "+new Date(o.created_at).toLocaleString("en-IN")),E("div","mute","Provider order: "+(o.provider_order||"nahi gaya")+(o.remains!=null?" | Baaki: "+o.remains:"")));
+ const p=E("div","","Link: ");
+ if(/^https?:\/\//.test(o.link)){const a=E("a","",o.link);a.href=o.link;a.target="_blank";a.rel="noopener noreferrer";p.append(a)}else p.append(o.link);
+ const sel=E("select");["Pending","Processing","Completed","Partial","Cancelled"].forEach(s=>{const op=E("option","",s);op.value=s;op.selected=s==o.status;sel.append(op)});
+ const nt=E("input");nt.placeholder="Customer ko update (zaroori nahi)";nt.value=o.note||"";
+ const b=E("button","btn","Save karein");b.onclick=async()=>{const {error}=await db.from("orders").update({status:sel.value,note:nt.value}).eq("id",o.id);done(b,error,"Save ho gaya")};
+ c.append(p,sel,nt,b);
+ if(!o.provider_order&&o.service_id){const pb=E("button","btn alt","Provider ko bhejein");pb.style.marginLeft="8px";pb.onclick=async()=>{pb.textContent="Bhej raha hoon...";const r=await fn({action:"send",order_id:o.id});pb.textContent=r.error?"Error: "+r.error:(r.manual?"Ye manual service hai":"Bhej diya")};c.append(pb)}
+ c.append(E("div","mute","Cancelled karne par paisa customer ke balance mein wapas aa jata hai."));L.append(c)});
+})();</script></body></html>

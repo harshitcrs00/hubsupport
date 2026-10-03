@@ -1,0 +1,18 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Login - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="land"><img class="logo" src="logo.png" alt="CRS" style="width:240px;margin-bottom:24px"><div class="box"><h2>Login ya naya account</h2><input id="em" type="email" placeholder="Email"><input id="pw" type="password" placeholder="Password"><button class="btn" id="li">Login</button> <button class="btn alt" id="su">Naya account</button><div class="msg" id="am"></div></div><h2>Hamari services</h2><div id="pub"></div><p class="mute">CRS - Corporate Regulatory Solutions, Meerut &middot; <a href="tel:9557890307">9557890307</a></p></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>
+(async()=>{
+const DEST="neworder.html";const ADM=false;
+const ses=(await db.auth.getSession()).data.session;
+if(ses&&(!ADM||ses.user.email==ADMIN_EMAIL)){location.replace(DEST);return}
+async function go(up){const f={email:$("em").value.trim(),password:$("pw").value};
+ const r=up?await db.auth.signUp(f):await db.auth.signInWithPassword(f);
+ if(r.error){$("am").textContent=ADM?"Email ya password galat hai":r.error.message;return}
+ if(!r.data.session){$("am").textContent="Email par aaya link kholein, fir login karein";return}
+ if(ADM&&r.data.session.user.email!=ADMIN_EMAIL){await db.auth.signOut();$("am").textContent="Ye account admin nahi hai";return}
+ location.href=DEST}
+$("li").onclick=()=>go(false);if($("su"))$("su").onclick=()=>go(true);
+if(!ADM){const r=await db.from("services").select("*").order("id");listS($("pub"),r.data||[])}
+})();</script></body></html>

@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Tickets - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><div class="box"><h2>Naya ticket</h2><input id="to" placeholder="Order ID (jaise CRS1001), zaroori nahi"><input id="ts" placeholder="Vishay"><textarea id="tm" rows="3" placeholder="Apni samasya likhein"></textarea>
+<button class="btn" id="go">Ticket bhejein</button><div class="msg" id="tmsg"></div></div><h2>Mere tickets</h2><div id="tl"></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("user","tickets.html");if(!S)return;
+
+async function load(){const {data,error}=await db.from("tickets").select("*").order("id",{ascending:false});
+ const L=$("tl");L.textContent="";if(error||!data.length){L.textContent=error?"Tickets load nahi hue.":"Abhi koi ticket nahi.";return}
+ data.forEach(t=>{const r=E("div","row");r.append(E("b","","#"+t.id+" "+t.subject),E("div","",t.message));
+  if(t.reply)r.append(E("div","","CRS ka jawab: "+t.reply));r.append(E("span","badge s-"+t.status,t.status));L.append(r)})}
+$("go").onclick=async()=>{const sub=$("ts").value.trim(),msg=$("tm").value.trim(),on=$("to").value.replace(/\D/g,"");
+ if(!sub||!msg){$("tmsg").textContent="Vishay aur samasya likhein";return}
+ const row={subject:sub,message:msg};if(on)row.order_id=Number(on)-1000;
+ const {error}=await db.from("tickets").insert(row);
+ if(error){$("tmsg").textContent=error.message;return}
+ $("ts").value=$("tm").value=$("to").value="";$("tmsg").textContent="Ticket bhej diya gaya";load()};
+load();
+})();</script></body></html>

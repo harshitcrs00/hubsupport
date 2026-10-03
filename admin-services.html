@@ -1,0 +1,19 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Services - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><div class="box"><h3>Nayi service</h3><input id="n" placeholder="Service ka naam"><input id="c" placeholder="Category (jaise Instagram)">
+<textarea id="d" rows="2" placeholder="Vivaran"></textarea><input id="r" type="number" min="0" placeholder="Rate per 1000 (Rs)">
+<input id="mn" type="number" min="1" placeholder="Min quantity (jaise 100)"><input id="mx" type="number" min="1" placeholder="Max quantity (jaise 100000)">
+<button class="btn" id="go">Service jodein</button><div class="msg" id="sm"></div></div><div id="sl"></div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("admin","admin-services.html");if(!S)return;
+
+async function load(){const {data,error}=await db.from("services").select("*").order("id");
+ const L=$("sl");L.textContent="";if(error){L.textContent=error.message;return}
+ data.forEach(s=>{const c=E("div","row");c.append(E("b","",s.id+" - "+s.name),E("div","mute",(s.category||"Other")+" | "+inr(s.rate)+" per 1000 | Min "+s.min_qty+" Max "+s.max_qty+(s.provider_id?" | Provider service":"")));
+  const b=E("button","btn alt","Hatayein");b.onclick=async()=>{if(confirm(s.name+" hatayein?")){await db.from("services").delete().eq("id",s.id);load()}};c.append(b);L.append(c)})}
+$("go").onclick=async()=>{const name=$("n").value.trim();if(!name){$("sm").textContent="Naam likhein";return}
+ const {error}=await db.from("services").insert({name,category:$("c").value.trim()||"Other",description:$("d").value,rate:Number($("r").value)||0,min_qty:Number($("mn").value)||10,max_qty:Number($("mx").value)||100000});
+ if(error){$("sm").textContent=error.message;return}
+ ["n","c","d","r","mn","mx"].forEach(i=>$(i).value="");$("sm").textContent="Service jod di gayi";load()};
+load();
+})();</script></body></html>

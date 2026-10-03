@@ -1,0 +1,14 @@
+<!DOCTYPE html><html lang="hi"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><meta name="robots" content="noindex"><title>Tickets - CRS</title>
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet"><link rel="icon" href="favicon.png"><link rel="stylesheet" href="style.css"></head><body>
+<div class="app"><aside class="side" id="side"></aside><div class="main"><div class="top" id="top"></div><h2>Tickets</h2><div id="t">Load ho raha hai...</div></div></div>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.45.4/dist/umd/supabase.min.js"></script><script src="config.js"></script><script src="common.js"></script>
+<script>(async()=>{const S=await shell("admin","admin-tickets.html");if(!S)return;
+
+const {data,error}=await db.from("tickets").select("*").order("id",{ascending:false});
+const L=$("t");L.textContent="";if(error||!data.length){L.textContent=error?error.message:"Abhi koi ticket nahi.";return}
+data.forEach(t=>{const c=E("div","row");
+ c.append(E("b","","#"+t.id+" "+t.subject+(t.order_id?" ("+oid(t.order_id)+")":"")),E("div","mute",t.user_email),E("div","",t.message),E("span","badge s-"+t.status,t.status));
+ const r=E("textarea");r.rows=2;r.placeholder="Jawab likhein";r.value=t.reply||"";
+ const b=E("button","btn","Jawab bhejein aur band karein");b.onclick=async()=>{const {error}=await db.from("tickets").update({reply:r.value,status:"Closed"}).eq("id",t.id);done(b,error,"Bhej diya")};
+ c.append(r,b);L.append(c)});
+})();</script></body></html>
