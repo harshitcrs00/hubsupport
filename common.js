@@ -3,7 +3,9 @@ const ADMIN_EMAIL="harshitcrs00@gmail.com";
 const $=i=>document.getElementById(i);
 const oid=n=>"CRS"+(1000+n),inr=n=>"₹"+Number(n||0).toLocaleString("en-IN",{maximumFractionDigits:2});
 function E(t,c,x){const e=document.createElement(t);if(c)e.className=c;if(x!==undefined)e.textContent=x;return e}
-async function fn(body){try{const {data,error}=await db.functions.invoke("smm",{body});return error?{error:error.message}:(data||{})}catch(e){return {error:String(e)}}}
+async function fn(body){try{const {data,error}=await db.functions.invoke("smm",{body});
+ if(error){let m=error.message;try{const j=await error.context.json();m=j.error||j.message||m}catch(e){}return {error:m}}
+ return data||{}}catch(e){return {error:String(e)}}}
 function done(b,error,t){b.textContent=error?"Nahi hua: "+error.message:t}
 function listS(el,svcs){el.textContent="";if(!svcs.length){el.textContent="Abhi koi service nahi.";return}
  svcs.forEach(s=>{const r=E("div","row");r.append(E("b","",s.id+" - "+s.name),E("div","mute",(s.category||"Other")+" | "+inr(s.rate)+" per 1000 | Min "+s.min_qty+" Max "+s.max_qty),E("div","",s.description||""));el.append(r)})}
